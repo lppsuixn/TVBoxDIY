@@ -59,7 +59,6 @@ jobs:
           done
       - name: Post To Telegram
         if: ${{ env.commit }}
-        working-directory: TVBoxOSC
         run: |
           if [ -n "${{ secrets.CHANNEL_ID }}" ] && [ -n "${{ secrets.BOT_TOKEN }}" ]; then
             OUTPUT="${{ github.workspace }}/apk/"
@@ -67,9 +66,9 @@ jobs:
             count=$(wc -m apk/q215613905-Release.log |cut -d ' ' -f1)
             echo $count
             if [ ${count} -eq 0 ] && [ ${count} -gt 1024 ]; then
-              echo -e "Commit: ${{ env.commit }}\nChangelog:\n${{ env.upStream }}/commits/main" > apk/q215613905-Release.log
+              echo -e "Commit: ${{ env.commit }}\nChangelog:\n${{ env.upStream }}/commits/main" > q215613905-Release.log
             fi
-            ESCAPED=`python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" "$(cat apk/q215613905-Release.log |sed -e '1s/: \(.*\)\/.*/: #\1/' -e 's#\([&"\/]\)#\\\\\1#g')"`
+            ESCAPED=`python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" "$(cat q215613905-Release.log |sed -e '1s/: \(.*\)\/.*/: #\1/' -e 's#\([&"\/]\)#\\\\\1#g')"`
             curl -v "https://api.telegram.org/bot${{ secrets.BOT_TOKEN }}/sendMediaGroup?chat_id=${{ secrets.CHANNEL_ID }}&media=%5B%7B%22type%22%3A%22document%22%2C%20%22media%22%3A%22attach%3A%2F%2FappRelease%22%2C%20%22caption%22%3A%22${ESCAPED}%22%7D%5D" -F appRelease="@$appRelease"
             
           fi

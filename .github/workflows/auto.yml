@@ -62,6 +62,8 @@ jobs:
         run: |
           if [ -n "${{ secrets.CHANNEL_ID }}" ] && [ -n "${{ secrets.BOT_TOKEN }}" ]; then
             OUTPUT="${{ github.workspace }}/apk/"
+            export LESSCHARSET=utf-8
+            echo -e "Commit: ${{ env.commit }}\nChangelog:" > q215613905-Release.log
             export appRelease=$(find $OUTPUT -name "*.apk")
             count=$(wc -m q215613905-Release.log |cut -d ' ' -f1)
             echo $count

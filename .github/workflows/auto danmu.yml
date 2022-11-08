@@ -1,0 +1,81 @@
+name: auto-danmu
+
+on:
+  workflow_dispatch:
+    inputs:
+      rebuild:
+        description: '忽略构建记录以重新构建'
+        required: false
+        type: boolean
+      donotpublish:
+        description: '构建后不提交发布新版'
+        required: false
+        type: boolean
+      testOption:
+        description: 'arm64支持，不支持ijk解码'
+        required: false
+        type: boolean
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Check New Commit
+        run: |
+          upStream=https://github.com/lppsuixn/TVBoxOS
+          echo "upStream=$upStream" >> $GITHUB_ENV
+          commit=$(curl -sL $upStream/commits/main |grep -o "/q215613905/TVBoxOS/commit/[a-z0-9]\+" |head -1 | cut -d\/ -f5)
+          if ! grep -q "$commit" README.md || [ "${{ inputs.rebuild }}" == "true" ]; then
+            echo "commit=$commit" >> $GITHUB_ENV
+            echo "commitS=${commit:0:7}" >> $GITHUB_ENV
+          fi
+      - name: Clone Project
+        if: ${{ env.commit }}
+        run: git clone -b main --depth=1 https://github.com/lppsuixn/TVBoxOS.git
+      - name: DIY
+        if: ${{ env.commit }}
+        run: |
+          chmod +x diy-danmu.sh
+          bash ${{ github.workspace }}/diy-J.sh
+      - name: Build With Gradle
+        if: ${{ env.commit }}
+        run: |
+          num=$(find ${{ github.workspace }} -name gradlew  | awk -F"/" '{print NF-1}')
+          DIR=$(find ${{ github.workspace }} -name gradlew  | cut -d \/ -f$num)
+          cd $DIR
+          chmod +x gradlew
+          ./gradlew assemblerelease --build-cache --parallel --daemon --warning-mode all
+      - name: Prepare App
+        if: ${{ env.commit }}
+        run: |
+          mkdir -p ${{ github.workspace }}/apk/
+          for file in `find ~ -name "*.apk" -print`; do
+            mv "$file" ${{ github.workspace }}/apk/
+          done
+      - name: Post To Telegram
+        if: ${{ env.commit }}
+        run: |
+          if [ -n "${{ secrets.CHANNEL_ID }}" ] && [ -n "${{ secrets.BOT_TOKEN }}" ]; then
+            OUTPUT="${{ github.workspace }}/apk/"
+            export LESSCHARSET=utf-8
+            echo -e "Commit: ${{ env.commit }}\nChangelog:" > q215613905-Release.log
+            export appRelease=$(find $OUTPUT -name "*.apk")
+            count=$(wc -m q215613905-Release.log |cut -d ' ' -f1)
+            echo $count
+            if [ ${count} -eq 0 ] && [ ${count} -gt 1024 ]; then
+              echo -e "Commit: ${{ env.commit }}\nChangelog:\n${{ env.upStream }}/commits/main" > q215613905-Release.log
+            fi
+            ESCAPED=`python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" "$(cat q215613905-Release.log |sed -e '1s/: \(.*\)\/.*/: #\1/' -e 's#\([&"\/]\)#\\\\\1#g')"`
+            curl -v "https://api.telegram.org/bot${{ secrets.BOT_TOKEN }}/sendMediaGroup?chat_id=${{ secrets.CHANNEL_ID }}&media=%5B%7B%22type%22%3A%22document%22%2C%20%22media%22%3A%22attach%3A%2F%2FappRelease%22%2C%20%22caption%22%3A%22${ESCAPED}%22%7D%5D" -F appRelease="@$appRelease"
+            
+          fi
+      - name: Upload App To Artifact
+        if: ${{ env.commit }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: com.github.tvbox.osc
+          path: ${{ github.workspace }}/apk/*
+

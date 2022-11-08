@@ -39,7 +39,7 @@ jobs:
         if: ${{ env.commit }}
         run: |
           chmod +x diy-danmu.sh
-          bash ${{ github.workspace }}/diy-J.sh
+          bash ${{ github.workspace }}/diy-danmu.sh
       - name: Build With Gradle
         if: ${{ env.commit }}
         run: |

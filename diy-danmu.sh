@@ -1,6 +1,7 @@
 #!/bin/bash
 
 #获取目录
+cat /home/runner/work/TVBoxDIY/TVBoxDIY/TVBoxOS/app/build.gradle
 CURRENT_DIR=$(cd $(dirname $0); pwd)
 num=$(find $CURRENT_DIR -name gradlew  | awk -F"/" '{print NF-1}')
 DIR=$(find $CURRENT_DIR -name gradlew  | cut -d \/ -f$num)

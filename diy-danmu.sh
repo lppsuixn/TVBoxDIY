@@ -1,5 +1,8 @@
 #!/bin/bash
 
+sed -i 's/com.github.tvbox.osc/com.github.tvbox.osc.danmu/g' $CURRENT_DIR/$DIR/app/build.gradle
+
+
 #获取目录
 cat /home/runner/work/TVBoxDIY/TVBoxDIY/TVBoxOS/app/build.gradle
 CURRENT_DIR=$(cd $(dirname $0); pwd)

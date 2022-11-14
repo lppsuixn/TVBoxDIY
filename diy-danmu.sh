@@ -1,13 +1,11 @@
 #!/bin/bash
 
-sed -i 's/com.github.tvbox.osc/com.github.tvbox.osc.danmu/g' $CURRENT_DIR/$DIR/app/build.gradle
-
-
 #获取目录
-cat /home/runner/work/TVBoxDIY/TVBoxDIY/TVBoxOS/app/build.gradle
 CURRENT_DIR=$(cd $(dirname $0); pwd)
 num=$(find $CURRENT_DIR -name gradlew  | awk -F"/" '{print NF-1}')
 DIR=$(find $CURRENT_DIR -name gradlew  | cut -d \/ -f$num)
+sed -i 's/com.github.tvbox.osc/com.github.tvbox.osc.danmu/g' $CURRENT_DIR/$DIR/app/build.gradle
+cat /home/runner/work/TVBoxDIY/TVBoxDIY/TVBoxOS/app/build.gradle
 cd $CURRENT_DIR/$DIR
 cp -f $CURRENT_DIR/DIY/TVBoxOSC.jks $CURRENT_DIR/$DIR/app/TVBoxOSC.jks
 cp -f $CURRENT_DIR/DIY/TVBoxOSC.jks $CURRENT_DIR/$DIR/TVBoxOSC.jks

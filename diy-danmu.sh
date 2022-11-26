@@ -1,5 +1,5 @@
 #!/bin/bash
-
+wget https://plugins.gradle.org/m2/com/kingja/loadsir/loadsir/1.3.8/loadsir-1.3.8.pom
 #获取目录
 CURRENT_DIR=$(cd $(dirname $0); pwd)
 num=$(find $CURRENT_DIR -name gradlew  | awk -F"/" '{print NF-1}')

@@ -66,9 +66,9 @@ jobs:
             count=$(wc -m lppsuixn-Release.log |cut -d ' ' -f1)
             echo $count
             if [ ${count} -eq 0 ] && [ ${count} -gt 1024 ]; then
-              echo -e "弹幕" > lppsuixn-Release.log
+              echo -e "同步q版" > lppsuixn-Release.log
             fi
-            ESCAPED='弹幕'
+            ESCAPED='同步q版'
             curl -v "https://api.telegram.org/bot${{ secrets.BOT_TOKEN }}/sendMediaGroup?chat_id=${{ secrets.CHANNEL_ID }}&media=%5B%7B%22type%22%3A%22document%22%2C%20%22media%22%3A%22attach%3A%2F%2FappRelease%22%2C%20%22caption%22%3A%22${ESCAPED}%22%7D%5D" -F appRelease="@$appRelease"
             
           fi
